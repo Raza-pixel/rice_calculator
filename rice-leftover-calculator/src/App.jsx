@@ -5,6 +5,9 @@ import { SettingsDrawer } from './components/SettingsDrawer';
 function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [bannerImage, setBannerImage] = useState(null);
+  const [locationLink, setLocationLink] = useState(
+    localStorage.getItem('riceLocationLink') || ''
+  );
   const hamburgerRef = useRef(null);
 
   return (
@@ -27,6 +30,7 @@ function App() {
       <Calculator
         onBannerChange={setBannerImage}
         bannerImage={bannerImage}
+        locationLink={locationLink}
       />
 
       {/* Settings Drawer */}
@@ -34,6 +38,8 @@ function App() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onBannerChange={setBannerImage}
+        locationLink={locationLink}
+        onLocationChange={setLocationLink}
       />
     </>
   );

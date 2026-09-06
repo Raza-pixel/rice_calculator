@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export function Calculator({ bannerImage }) {
+export function Calculator({ bannerImage, locationLink }) {
   const [ricePrepared, setRicePrepared] = useState('');
   const [riceLeftOver, setRiceLeftOver] = useState('');
 
@@ -70,6 +70,37 @@ export function Calculator({ bannerImage }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-10 sm:py-16">
+      {/* Location Button */}
+      <button
+        onClick={() => window.open(getValidUrl(locationLink), '_blank')}
+        className="fixed top-5 right-6 w-10 h-10 flex items-center justify-center
+          rounded-lg text-stone-600 hover:bg-stone-100 hover:text-stone-900
+          transition-colors duration-150"
+        aria-label="Open location"
+        title="Open location"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"
+          />
+          <circle
+            cx="12"
+            cy="10"
+            r="2.5"
+            strokeWidth={2}
+          />
+        </svg>
+      </button>
+
       <div className="w-full max-w-5xl flex flex-col md:flex-row gap-10 md:gap-16 items-start">
 
         {/* Calculator - Left Half */}
@@ -176,7 +207,8 @@ export function Calculator({ bannerImage }) {
 
         {/* Banner - Right Half */}
         <div className="w-full md:w-1/2 flex items-center justify-center">
-          <Banner image={bannerImage} />
+          <Banner image={bannerImage} locationLink={locationLink} />
+          
         </div>
 
       </div>
@@ -184,37 +216,69 @@ export function Calculator({ bannerImage }) {
   );
 }
 
-function Banner({ image }) {
+function getValidUrl(url) {
+  if (!url) return null;
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) return null;
+  if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+    return trimmedUrl;
+  }
+  return `https://${trimmedUrl}`;
+}
+
+function Banner({ image, locationLink }) {
+  const bannerContent = (
+    <div className="relative rounded-xl overflow-hidden bg-stone-100">
+      {image ? (
+        <img
+          src={image}
+          alt="Banner"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <svg
+            className="w-12 h-12 text-stone-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="mt-12 w-full max-w-md">
-      <div className="relative rounded-xl overflow-hidden bg-stone-100">
-        {image ? (
-          <img
-            src={image}
-            alt="Banner"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <svg
-              className="w-12 h-12 text-stone-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          </div>
-        )}
-      </div>
+      {locationLink ? (
+        <a
+          href={
+            locationLink.startsWith('http://') ||
+            locationLink.startsWith('https://')
+              ? locationLink
+              : `https://${locationLink}`
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block cursor-pointer"
+          aria-label="Open location"
+        >
+          {bannerContent}
+        </a>
+      ) : (
+        bannerContent
+      )}
     </div>
   );
 }
+
 
 export default Calculator;

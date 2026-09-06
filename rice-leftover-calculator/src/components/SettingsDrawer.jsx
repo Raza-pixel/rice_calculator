@@ -1,8 +1,9 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 const STORAGE_KEY = 'riceBannerImage';
+const LOCATION_STORAGE_KEY = 'riceLocationLink';
 
-export function SettingsDrawer({ isOpen, onClose, onBannerChange }) {
+export function SettingsDrawer({ isOpen, onClose, onBannerChange, locationLink, onLocationChange }) {
   const drawerRef = useRef(null);
   const previousActiveElement = useRef(null);
   const fileInputRef = useRef(null);
@@ -74,6 +75,13 @@ export function SettingsDrawer({ isOpen, onClose, onBannerChange }) {
   const handleRemove = () => {
     localStorage.removeItem(STORAGE_KEY);
     onBannerChange(null);
+  };
+
+  const handleLocationChange = (e) => {
+    const value = e.target.value.trim();
+
+    localStorage.setItem(LOCATION_STORAGE_KEY, value);
+    onLocationChange(value);
   };
 
   return (
@@ -157,6 +165,33 @@ export function SettingsDrawer({ isOpen, onClose, onBannerChange }) {
                 >
                   Remove Banner
                 </button>
+
+                {/* Location Link */}
+                <div className="pt-4 border-t border-stone-200">
+                  <label
+                    htmlFor="location-link"
+                    className="block text-sm font-medium text-stone-700 uppercase tracking-wider mb-3"
+                  >
+                    Location Link
+                  </label>
+
+                  <input
+                    id="location-link"
+                    type="url"
+                    value={locationLink}
+                    onChange={handleLocationChange}
+                    placeholder="https://maps.google.com/..."
+                    className="w-full px-4 py-3 text-sm text-stone-900 bg-white border border-stone-300 rounded-lg
+                      placeholder:text-stone-400
+                      focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+                      transition-colors duration-150 focus-ring"
+                  />
+
+                  <p className="mt-2 text-xs text-stone-500">
+                    This link will open when the banner is clicked.
+                  </p>
+                </div>
+
               </div>
             </section>
           </div>
@@ -170,6 +205,7 @@ export function SettingsDrawer({ isOpen, onClose, onBannerChange }) {
         </div>
       </div>
     </div>
+
   );
 }
 
