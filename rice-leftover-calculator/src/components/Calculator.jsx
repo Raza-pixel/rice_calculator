@@ -3,6 +3,8 @@ import { useState, useCallback } from 'react';
 export function Calculator({ bannerImage, locationLink }) {
   const [ricePrepared, setRicePrepared] = useState('');
   const [riceLeftOver, setRiceLeftOver] = useState('');
+  const [peopleNotEating, setPeopleNotEating] = useState('');
+  const [peopleThatAte, setPeopleThatAte] = useState('');
 
   // Calculate amount of raw rice to be reduced
   const rice_to_be_reduced = useCallback(() => {
@@ -18,6 +20,25 @@ export function Calculator({ bannerImage, locationLink }) {
     return raw_rice_reduced;
   }, [riceLeftOver]);
 
+  // Calculate rice to reduce based on people not eating tomorrow
+const portion_reduction = useCallback(() => {
+  const prepared = parseFloat(ricePrepared);
+  const ateCount = parseFloat(peopleThatAte);
+  const notEating = parseFloat(peopleNotEating);
+
+  if (
+    isNaN(prepared) ||
+    isNaN(ateCount) ||
+    isNaN(notEating) ||
+    ateCount <= 0 ||
+    notEating <= 0
+  ) {
+    return 0;
+  }
+
+  const portionSize = prepared / ateCount; // grams of raw rice per person
+  return portionSize * notEating;
+  }, [ricePrepared, peopleThatAte, peopleNotEating]);
   
   // Calculate leftover percentage
   const leftoverPercentage = useCallback(() => {
@@ -67,6 +88,7 @@ export function Calculator({ bannerImage, locationLink }) {
 
   const percentage = leftoverPercentage();
   const rice_reduction_amount = rice_to_be_reduced();
+  const portion_reduction_amount = portion_reduction();
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-10 sm:py-16">
@@ -111,7 +133,7 @@ export function Calculator({ bannerImage, locationLink }) {
           </h1>
 
           {/* Input Fields */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Rice Prepared */}
             <div>
               <label
@@ -128,7 +150,7 @@ export function Calculator({ bannerImage, locationLink }) {
                 value={ricePrepared}
                 onChange={(e) => setRicePrepared(e.target.value)}
                 placeholder="e.g., 500"
-                className="w-full px-4 py-3 text-lg text-stone-900 bg-white border border-stone-300 rounded-lg
+                className="w-full px-4 py-2.5 text-base text-stone-900 bg-white border border-stone-300 rounded-lg
                   placeholder:text-stone-400
                   focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
                   transition-colors duration-150
@@ -156,7 +178,7 @@ export function Calculator({ bannerImage, locationLink }) {
                 value={riceLeftOver}
                 onChange={(e) => setRiceLeftOver(e.target.value)}
                 placeholder="e.g., 100"
-                className={`w-full px-4 py-3 text-lg text-stone-900 bg-white border rounded-lg
+                className={`w-full px-4 py-2.5 text-base text-stone-900 bg-white border rounded-lg
                   placeholder:text-stone-400
                   transition-colors duration-150
                   focus-ring
@@ -166,6 +188,34 @@ export function Calculator({ bannerImage, locationLink }) {
               />
               <p id="rice-leftover-hint" className="mt-1 text-xs text-stone-500">
                 Enter the amount of rice left over 
+              </p>
+            </div>
+
+            {/* PPL who ate today Section */}
+            <div>
+              <label
+                htmlFor="people-that-ate"
+                className="block text-sm font-medium text-stone-700 mb-2"
+              >
+                Number of Family Members Eating
+              </label>
+              <input
+                type="number"
+                id="people-that-ate"
+                step="1"
+                min="0"
+                value={peopleThatAte}
+                onChange={(e) => setPeopleThatAte(e.target.value)}
+                placeholder="e.g., 2"
+                className="w-full px-4 py-2.5 text-base text-stone-900 bg-white border border-stone-300 rounded-lg
+                  placeholder:text-stone-400
+                  focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+                  transition-colors duration-150
+                  focus-ring"
+                aria-describedby="people-that-ate-hint"
+              />
+              <p id="people-that-ate-hint" className="mt-1 text-xs text-stone-500">
+                Enter Number of Family members eating today
               </p>
             </div>
 
@@ -188,20 +238,50 @@ export function Calculator({ bannerImage, locationLink }) {
           </div>
 
           {/* Result Section */}
-          <div className="mt-10 pt-8 border-t border-stone-200">
+          <div className="mt-6 pt-5 border-t border-stone-200">
             <div className="text-center">
-              <p className="text-sm font-medium text-stone-600 uppercase tracking-wider mb-2">
+              <p className="text-sm font-medium text-stone-600 uppercase tracking-wider mb-1">
                 For future purposes, reduce the cooking amount from {ricePrepared}g to 
               </p>
-              <p className="text-5xl sm:text-6xl font-light text-stone-900 tabular-nums">
-                {ricePrepared - rice_reduction_amount} grams
+
+              <p className="text-4xl sm:text-5xl font-light text-stone-900 tabular-nums">
+                {(parseFloat(ricePrepared) || 0) - (rice_reduction_amount || 0) - portion_reduction_amount} grams
               </p>
+
               {percentage === null && ricePrepared && riceLeftOver && !hasNonNumericInput() && !isPreparedZero() && (
-                <p className="mt-2 text-sm text-stone-500">
+                <p className="mt-1 text-sm text-stone-500">
                   Enter values above to calculate
                 </p>
               )}
             </div>
+          </div>
+           
+          {/* PPL not eating tomorrow Section */}
+          <div className="mt-10">
+            <label
+              htmlFor="people-not-eating"
+              className="block text-sm font-medium text-stone-700 mb-2"
+            >
+              People Not Eating Tomorrow
+            </label>
+            <input
+              type="number"
+              id="people-not-eating"
+              step="1"
+              min="0"
+              value={peopleNotEating}
+              onChange={(e) => setPeopleNotEating(e.target.value)}
+              placeholder="e.g., 1"
+              className="w-full px-4 py-2.5 text-base text-stone-900 bg-white border border-stone-300 rounded-lg
+                placeholder:text-stone-400
+                focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+                transition-colors duration-150
+                focus-ring"
+              aria-describedby="people-not-eating-hint"
+            />
+            <p id="people-not-eating-hint" className="mt-1 text-xs text-stone-500">
+              Enter Number of Family members that won't be present tomorrow
+            </p>
           </div>
         </div>
 
