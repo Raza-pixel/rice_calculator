@@ -2,11 +2,29 @@ import { useEffect, useRef, useCallback } from 'react';
 
 const STORAGE_KEY = 'riceBannerImage';
 const LOCATION_STORAGE_KEY = 'riceLocationLink';
+const BUTTONS_STORAGE_KEY = 'riceActionButtons';
 
-export function SettingsDrawer({ isOpen, onClose, onBannerChange, locationLink, onLocationChange }) {
+
+
+export function SettingsDrawer({ isOpen, onClose, onBannerChange, locationLink, onLocationChange, buttons, onButtonsChange}) {
   const drawerRef = useRef(null);
   const previousActiveElement = useRef(null);
   const fileInputRef = useRef(null);
+
+  const handleButtonChange = (index, field, value) => {
+    const updatedButtons = buttons.map((button, i) =>
+      i === index
+        ? { ...button, [field]: value }
+        : button
+    );
+
+    localStorage.setItem(
+      BUTTONS_STORAGE_KEY,
+      JSON.stringify(updatedButtons)
+    );
+
+    onButtonsChange(updatedButtons);
+  };
 
   // Focus management and keyboard handling
   useEffect(() => {
@@ -192,6 +210,74 @@ export function SettingsDrawer({ isOpen, onClose, onBannerChange, locationLink, 
                   </p>
                 </div>
 
+              </div>
+            </section>
+
+            {/* Action Buttons Section */}
+            <section>
+              <h3 className="text-sm font-medium text-stone-700 uppercase tracking-wider mb-4">
+                Action Buttons
+              </h3>
+
+              <div className="space-y-6">
+                {buttons.map((button, index) => (
+                  <div
+                    key={index}
+                    className="space-y-3 pt-4 border-t border-stone-200 first:border-t-0 first:pt-0"
+                  >
+                    <p className="text-sm font-medium text-stone-700">
+                      Button {index + 1}
+                    </p>
+
+                    {/* Button Name */}
+                    <div>
+                      <label
+                        htmlFor={`button-name-${index}`}
+                        className="block text-xs font-medium text-stone-600 mb-1"
+                      >
+                        Button Name
+                      </label>
+
+                      <input
+                        id={`button-name-${index}`}
+                        type="text"
+                        value={button.name}
+                        onChange={(e) =>
+                          handleButtonChange(index, 'name', e.target.value)
+                        }
+                        placeholder={`Button ${index + 1}`}
+                        className="w-full px-4 py-2.5 text-sm text-stone-900 bg-white border border-stone-300 rounded-lg
+                          placeholder:text-stone-400
+                          focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+                          transition-colors duration-150 focus-ring"
+                      />
+                    </div>
+
+                    {/* Button Link */}
+                    <div>
+                      <label
+                        htmlFor={`button-link-${index}`}
+                        className="block text-xs font-medium text-stone-600 mb-1"
+                      >
+                        Button Link
+                      </label>
+
+                      <input
+                        id={`button-link-${index}`}
+                        type="url"
+                        value={button.link}
+                        onChange={(e) =>
+                          handleButtonChange(index, 'link', e.target.value)
+                        }
+                        placeholder="https://example.com"
+                        className="w-full px-4 py-2.5 text-sm text-stone-900 bg-white border border-stone-300 rounded-lg
+                          placeholder:text-stone-400
+                          focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+                          transition-colors duration-150 focus-ring"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           </div>

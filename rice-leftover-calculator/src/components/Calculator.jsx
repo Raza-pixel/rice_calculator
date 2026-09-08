@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export function Calculator({ bannerImage, locationLink }) {
+export function Calculator({ bannerImage, locationLink, buttons }) {
   const [ricePrepared, setRicePrepared] = useState('');
   const [riceLeftOver, setRiceLeftOver] = useState('');
   const [peopleNotEating, setPeopleNotEating] = useState('');
@@ -23,22 +23,34 @@ export function Calculator({ bannerImage, locationLink }) {
   // Calculate rice to reduce based on people not eating tomorrow
 const portion_reduction = useCallback(() => {
   const prepared = parseFloat(ricePrepared);
+  const leftOver = parseFloat(riceLeftOver);
   const ateCount = parseFloat(peopleThatAte);
   const notEating = parseFloat(peopleNotEating);
 
   if (
     isNaN(prepared) ||
+    isNaN(leftOver) ||
     isNaN(ateCount) ||
     isNaN(notEating) ||
+    prepared <= 0 ||
     ateCount <= 0 ||
     notEating <= 0
   ) {
     return 0;
   }
 
-  const portionSize = prepared / ateCount; // grams of raw rice per person
+  // Convert cooked leftover back to raw rice equivalent
+  const rawLeftover = leftOver / 2.5;
+
+  // Rice that was actually consumed today
+  const actualConsumed = prepared - rawLeftover;
+
+  // Amount consumed by each person
+  const portionSize = actualConsumed / ateCount;
+
+  // Amount to reduce tomorrow because these people won't be eating
   return portionSize * notEating;
-  }, [ricePrepared, peopleThatAte, peopleNotEating]);
+  }, [ricePrepared, riceLeftOver, peopleThatAte, peopleNotEating]);
   
   // Calculate leftover percentage
   const leftoverPercentage = useCallback(() => {
@@ -292,7 +304,29 @@ const portion_reduction = useCallback(() => {
         </div>
 
       </div>
+
+      {/* Action Buttons */}
+      <div className="w-full max-w-5xl mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(buttons || []).map((button, index) => (
+            <a
+              key={index}
+              href={getValidUrl(button.link)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center px-6 py-4
+                bg-stone-900 text-white rounded-lg
+                hover:bg-stone-700
+                transition-colors duration-150
+                text-sm font-medium"
+            >
+              {button.name}
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
+    
   );
 }
 
